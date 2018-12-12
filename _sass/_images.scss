@@ -17,5 +17,5 @@ img.object-fit-contain {
 }
 
 .splash-bg {
-    @include background-image($splash-bg, $y: 10%, $responsive: true);
+    @include background-image($splash-bg, $responsive: true);
 }
