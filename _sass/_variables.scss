@@ -15,6 +15,10 @@ $full-shadow:           0 0 0.24em black;
 
 $perspective:           2000px;
 
+// Colors
+
+$brand-color: #740400;
+
 // Images
 
 $splash-bg:             url("#{$baseurl}/assets/gulp-backgrounds/lower-pool.jpg");
@@ -25,12 +29,17 @@ $themes: (
     "light": (
         text-color: #171717,
         background-color: white,
-        brand-color: royalblue,
+        brand-color: $brand-color,
     ),
     "dark": (
         text-color: white,
         background-color: #171717,
-        brand-color: royalblue,
+        brand-color: $brand-color,
+    ),
+    "red": (
+        text-color: white,
+        background-color: $brand-color,
+        brand-color: #171717,
     ),
 );
 
