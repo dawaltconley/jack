@@ -6,7 +6,10 @@ title: Home Page
 <div class="screen-height-min flex-row">
 
   <div class="half-width expand-children">
-    <img class="full-size object-fit-cover" src="{{ site.baseurl }}/assets/dancer.png" alt="A shot of a dancer from one of my videos.">
+    {% capture dancer %}
+      <img class="full-size object-fit-cover" src="{{ site.baseurl }}/assets/gulp-pictures/dancer.png" alt="A shot of a dancer from one of my videos.">
+    {% endcapture %}
+    {% include gulp-picture.liquid img=dancer %}
   </div>
 
   <div class="red half-width padding-l flex-col flex-justify-center">

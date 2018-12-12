@@ -167,7 +167,7 @@ gulp.task("srcset", gulp.series(srcset.tasks));
 gulp.task("backgrounds", gulp.series(backgrounds.tasks));
 
 gulp.task("images", gulp.series(
-    "image-min",
+    // "image-min",
     gulp.parallel("pictures", "srcset", "backgrounds")
 ));
 
