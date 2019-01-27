@@ -1,0 +1,14 @@
+{% assign title = include.video.title %}
+{% assign link = include.video.link %}
+{% assign type = include.video.media %}
+{% case type %}
+{% when 'youtube' %}
+  {% assign link = link | replace: '/watch?v=', '/embed/' %}
+{% when 'vimeo' %}
+  {% assign link = link | remove: 'https://vimeo.com/' | prepend: 'https://player.vimeo.com/video/' | append: '?title=0&byline=0&portrait=0' %}
+{% endcase %}
+
+<div class="aspect-16-9 margin-m-b">
+  {% include loading.html %}
+  <iframe class="full-width" src="{{ link }}" allowfullscreen seamless data-analytics-category="Video" data-analytics-action="click" data-analytics-label="Watched {{ title }}"></iframe>
+</div>
