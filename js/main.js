@@ -94,7 +94,7 @@
             left: cRect.left - pRect.left,
             right: cRect.right - pRect.left
         }
-        if (parent.offsetHeight != parent.scrollHeight) {
+        if (parent.offsetHeight < parent.scrollHeight) {
             rRect.top = rRect.top + parent.scrollTop;
             rRect.bottom = rRect.bottom + parent.scrollTop;
             rRect.left = rRect.left + parent.scrollLeft;
@@ -209,7 +209,6 @@
         function scrolling() {
             var newPos = page.scrollTop;
             if ((newPos < oldPos && direction == "up") || (newPos > oldPos && direction == "down")) {
-                removeListener();
                 callback();
             }
             oldPos = newPos;
@@ -231,6 +230,52 @@
 /*
  * DOM Manipulation
  */
+
+    function imgLoaded(img) {
+        return img.complete && img.naturalHeight !== 0;
+    }
+
+    function afterImageLoad(img, cb) {
+        if (imgLoaded(img)) {
+            return cb();
+        } else {
+            return img.addEventListener("load", cb);
+        }
+    }
+
+    var lazyImages = toArray(document.querySelectorAll("img[data-lazy]"));
+    for (var i = 0; i < lazyImages.length; i++) {
+        lazyImages[i] = new LazyImage(lazyImages[i]);
+    }
+
+    function LazyImage(img) {
+        if (imgLoaded(img)){
+            this.alreadyLoaded = true;
+        } else {
+            var attributes = ["src", "srcset"];
+            this.element = img;
+            this.assets = {};
+            ["src", "srcset"].forEach(function (a) {
+                var asset = img.getAttribute(a);
+                this.assets[a] = asset ? asset : "";
+                img.setAttribute(a, "");
+            }.bind(this));
+        }
+    }
+
+    LazyImage.prototype.load = function () {
+        if (!this.alreadyLoaded) {
+            for (var attribute in this.assets) {
+                this.element.setAttribute(attribute, this.assets[attribute]);
+            }
+        }
+    }
+
+    window.addEventListener("load", function () {
+        lazyImages.forEach(function (e) {
+            e.load();
+        });
+    });
 
     var shuffleChildren = toArray(document.querySelectorAll("[data-shuffle-children]"));
     shuffleChildren.forEach(function (e) {
@@ -255,11 +300,19 @@
  */
 
     var classRemoveElements = toArray(document.querySelectorAll("[data-class-rm]"));
+    var classAddElements = toArray(document.querySelectorAll("[data-class-add]"));
 
     classRemoveElements.forEach(function (element) {
         var rmClasses = element.getAttribute("data-class-rm").split(" ");
         for (var i=0; i < rmClasses.length; i++) {
             element.classList.remove(rmClasses[i]);
+        }
+    });
+
+    classAddElements.forEach(function (element) {
+        var addClasses = element.getAttribute("data-class-add").split(" ");
+        for (var i=0; i < addClasses.length; i++) {
+            element.classList.add(addClasses[i]);
         }
     });
 
@@ -313,6 +366,16 @@
         document.body.insertBefore(this.element, document.body.firstChild);
     }
 
+    FixedHeader.prototype.hideHeaderRef = function () {
+        this.headerRef.setAttribute("aria-hidden", "true");
+        this.headerRef.setAttribute("role", "presentation");
+    }
+
+    FixedHeader.prototype.showHeaderRef = function () {
+        this.headerRef.removeAttribute("aria-hidden");
+        this.headerRef.removeAttribute("role");
+    }
+
     FixedHeader.prototype.scroll = function () {
         var f = this;
         var e = this.element;
@@ -321,6 +384,7 @@
         window.clearTimeout(f.doneScrolling);
         if ((e.style.display != "none" && pos > f.refPos.top) || (e.style.display == "none" && pos > f.refPos.bottom)) {
             e.style.display = "";
+            f.hideHeaderRef();
             f.interruptSlideDown = true;
             var top = parseInt(e.style.top);
             if ((scrollDiff < 0 && top < 0) || (scrollDiff > 0 && top > -f.height)){
@@ -334,6 +398,7 @@
             }
         } else if (e.style.display != "none") {
             e.style.display = "none";
+            f.showHeaderRef();
             updateObj(e.style, { display: "none", top: -f.height.toString() + "px" });
             f.setShadow();
         }
@@ -346,7 +411,7 @@
         this.doneResizing = window.setTimeout(win.addEventListener.bind(win, "scroll", this.scrollListener, passive), 100);
         this.refPos = pagePos(this.headerRef);
         this.height = this.headerRef.clientHeight;
-        updateObj(this.element.style, { width: this.headerRef.clientWidth.toString() + "px" });
+        updateObj(this.element.style, { width: this.headerRef.clientWidth.toString() + "px", height: this.height.toString() + "px" });
     }
 
     FixedHeader.prototype.slideDown = function () {
@@ -417,7 +482,12 @@
             button.classList.remove("hidden");
         });
         this.state = "open";
-        this.removeListener = onScrollDown(this.close.bind(this));
+        this.removeListener = onScrollDown(function () {
+            if (this.element.getBoundingClientRect().top <=0) {
+                this.close();
+                this.removeListener();
+            }
+        }.bind(this));
     };
 
     CollapsibleMenu.prototype.close = function () {
@@ -441,7 +511,6 @@
     };
 
     CollapsibleMenu.prototype.addListeners = function () {
-        this.links.style.overflow = "hidden";
         for (var method in this.buttons) {
             if (this.buttons[method]) {
                 this.buttons[method].forEach(function (button) {
@@ -558,6 +627,181 @@
             obj.setBg();
         }
     });
+
+/*
+ * Animations
+ */
+
+    var animatedElements = toArray(document.querySelectorAll(".animate"));
+
+    animatedElements.forEach(function (element) {
+        var hasStarted = parseBoolean(element.getAttribute("data-animation-start"));
+        if (!hasStarted) {
+            element.classList.remove("animate");
+        } else {
+            console.log("Page load was too late for " + element.id + " animation.");
+        }
+    });
+
+    function playAnimations() {
+        animatedElements.forEach(function (element) {
+            element.classList.add("animate", "animate-js");
+        });
+    }
+
+/*
+ * Slideshows
+ */
+
+    function Slideshow(e) {
+        this.frame = e;
+
+        this.slides = toArray(e.querySelectorAll("[data-slide]"));
+        for (var i = 0; i < this.slides.length; i++) {
+            this.slides[i] = new Slide(this.slides[i]);
+        }
+        this.slides = this.slides.sort(function (a, b) { return a.order - b.order; });
+        this.slides.forEach(function (slide, i) {
+            slide.index = i;
+            if (i === 0) {
+                slide.element.style.opacity = "1";
+            } else {
+                slide.element.style.opacity = "0";
+            }
+        })
+        this.arrange(0);
+
+        var timing = e.getAttribute("data-slideshow").split(":").map(function (t) {
+            return Number(t) * 1000;
+        });
+        this.cycle = timing[0] ? timing[0] : 10000;
+        this.fadeTime = timing.length > 1 && timing[1] ? timing[1] : this.cycle / 4;
+        this.now = 0;
+
+        this.controls = toArray(e.querySelectorAll("[data-button]"));
+        this.controls.forEach(function (c) {
+            var action = c.getAttribute("data-button").split(":");
+            var clickTime = action.length > 1 && action[1] ? Number(action[1])*1000 : this.fadeTime;
+            action = action[0].trim().toLowerCase();
+            if (action == "next") {
+                action = this.fadeToNext.bind(this, clickTime);
+            } else if (action == "prev") {
+                action = this.fadeToPrev.bind(this, clickTime);
+            } else {
+                action = function () {};
+            }
+            c.addEventListener("click", function () {
+                action();
+                window.clearTimeout(this.timeout);
+                this.timePaused = this.now;
+                this.paused = true;
+            }.bind(this));
+        }.bind(this))
+    }
+
+    function Slide(e) {
+        var slideNum = Number(e.getAttribute("data-slide"));
+        this.element = e;
+        this.order = slideNum ? slideNum : undefined;
+    }
+
+    Slide.prototype.fadeOut = function (dur) {
+        var slide = this.element;
+        var initOpacity = parseInt(slide.style.opacity);
+        if (initOpacity) {
+            var start = performance.now();
+            var frame = requestAnimationFrame(function fade() {
+                var elapsed = (performance.now() - start) / dur;
+                elapsed = Math.min(elapsed, 1);
+                slide.style.opacity = ((1 - elapsed) / initOpacity).toString();
+                if (elapsed < 1) {
+                    frame = requestAnimationFrame(fade);
+                }
+            });
+            window.setTimeout(cancelAnimationFrame.bind(window, frame), dur);
+        }
+    }
+
+    Slideshow.prototype.arrange = function (i) {
+        this.current = this.slides[i];
+        for (var j = 0; j < this.slides.length; j++) {
+            var style = this.slides[j].element.style;
+            if (j === i) {
+                style.zIndex = "0";
+            } else {
+                style.zIndex = "-1";
+            }
+        }
+    }
+
+    Slideshow.prototype.fadeTo = function (i) {
+        if (!this.fading) {
+            var dur = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.fadeTime;
+            var last = this.current;
+            var next = this.slides[i];
+            this.fading = true;
+            this.start = performance.now();
+            next.element.style.opacity = "1";
+            last.fadeOut(dur);
+            window.setTimeout(function () {
+                this.arrange(i);
+                this.fading = false;
+            }.bind(this), dur + 100);
+        }
+    }
+
+    Slideshow.prototype.fadeToNext = function () {
+        var dur = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : undefined;
+        var next = this.current.index + 1;
+        if (next >= this.slides.length) {
+            next = 0;
+        }
+        this.fadeTo(next, dur);
+    }
+
+    Slideshow.prototype.fadeToPrev = function () {
+        var dur = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : undefined;
+        var prev = this.current.index - 1;
+        if (prev < 0) {
+            prev = this.slides.length - 1;
+        }
+        this.fadeTo(prev, dur);
+    }
+
+    Slideshow.prototype.play = function () {
+        var s = this;
+        s.paused = false;
+        s.start = performance.now();
+        requestAnimationFrame(function next() {
+            s.now = performance.now();
+            window.clearTimeout(s.timeout);
+            s.timeout = window.setTimeout(function () {
+                s.timePaused = s.now;
+                s.frameTimedOut = true;
+            }, 100);
+            if (s.frameTimedOut) {
+                s.start = s.now - (s.timePaused - s.start);
+                s.frameTimedOut = false;
+            }
+            if (s.now - s.start >= s.cycle) {
+                s.fadeToNext();
+            }
+            if (!s.paused) {
+                requestAnimationFrame(next);
+            }
+        });
+    }
+
+    var slideshows = toArray(document.querySelectorAll("[data-slideshow]"));
+    for (var i = 0; i < slideshows.length; i++) {
+        slideshows[i] = new Slideshow(slideshows[i]);
+    }
+
+    window.addEventListener("load", function () {
+        slideshows.forEach(function (s) {
+            s.play();
+        });
+    }, passive);
 
 /*
  * Fullscreen

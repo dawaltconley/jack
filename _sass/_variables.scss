@@ -8,6 +8,7 @@ $base-line-length:      36em;
 $base-icon-size:        1.5rem;
 
 $header-sizes:          2em, 1.2em, 1.1em;
+$header-font-family:    null;
 $header-font-weight:    600;
 
 $text-shadow:           1px 1px 4px rgba(0, 0, 0, 0.2);
@@ -63,6 +64,7 @@ $spacings: (
     "s":        15px,
     "m":        30px,
     "l":        60px,
+    "full":     100%,
 );
 
 $default-spacing: map-get($spacings, m);
@@ -90,3 +92,10 @@ $bp: (
     "mobile":   600px,
     "header":   600px,
 );
+
+// Functional
+
+$sides: "top", "bottom", "left", "right";
+$side: null;
+
+$angles: ("top": 0deg, "bottom": 180deg, "left": 90deg, "right": 270deg);

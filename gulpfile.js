@@ -20,7 +20,7 @@ var fs = require("fs");
 const jekyllEnv = process.env.CONTEXT == "production" ? "production" : "gulp";
 
 function jekyllBuild(env = "development") {
-    var cmd = "JEKYLL_ENV=" + env + " bundle exec jekyll build";
+    var cmd = `JEKYLL_ENV=${env} bundle exec jekyll build`;
     return child.exec(cmd, { stdio: "inherit" });
 }
 
@@ -31,13 +31,15 @@ gulp.task("build", jekyllBuild.bind(null, jekyllEnv));
  */
 
 gulp.task("css", function (cb) {
-    pump([
-        gulp.src("./_site/css/main.css"),
-        postcss([
+    const normalize = gulp.src("./node_modules/normalize.css/normalize.css");
+    const main = gulp.src("./_site/css/main.css")
+        .pipe(postcss([
             autoprefixer()
-        ]),
-        gulp.dest("./_site/css")
-    ], cb);
+        ]));
+
+    return merge(normalize, main)
+        .pipe(concat("main.css"))
+        .pipe(gulp.dest("./_site/css"));
 });
 
 /*
@@ -91,10 +93,10 @@ function ImageType(name, dir) {
     this.name = name;
     this.dir = dir;
 
-    var cleanTaskName = name + "-clean";
+    var cleanTaskName = `${name}-clean`;
     gulp.task(cleanTaskName, function (cb) {
         pump([
-            gulp.src(dir + "/responsive/*"), 
+            gulp.src(`${dir}/responsive/*`),
             clean(),
             gulp.dest(dir)
         ], cb);
@@ -108,12 +110,12 @@ ImageType.prototype.newTask = function (settings, suffix) {
     gulp.task(taskName, function (cb) {
         pump([
             gulp.src([
-                dir + "/*",
-                "!" + dir + "/responsive"
+                `${dir}/*`,
+                `!${dir}/responsive`
             ]),
             imageResize(settings),
             rename({ suffix: suffix }),
-            gulp.dest(dir + "/responsive")
+            gulp.dest(`${dir}/responsive`)
         ], cb)
     });
     this.tasks.splice(-1, 0, taskName); // add second to last in task list; before the cleaning task
@@ -129,13 +131,13 @@ imageSizes["dp"].forEach(function (bp) {
         srcset.newTask({
             width: bp.x * d,
             filter: "Catrom"
-        }, "-" + Math.round(bp.x * d) + "w");
+        }, `-${Math.round(bp.x * d)}w`);
 
         pictures.newTask({
             width: bp.x * d,
             height: bp.y * d,
             filter: "Catrom"
-        }, "-" + bp.x + "x" + bp.y + "-" + d + "x");
+        }, `-${bp.x}x${bp.y}-${d}x`);
 
         backgrounds.newTask({
             width: (bp.x * d),
@@ -144,7 +146,7 @@ imageSizes["dp"].forEach(function (bp) {
             upscale: false,
             filter: "Catrom",
             interlace: jekyllEnv == "production" ? true : false
-        }, "-" + bp.x + "x" + bp.y + "-" + d + "x");
+        }, `-${bp.x}x${bp.y}-${d}x`);
     });
 });
 

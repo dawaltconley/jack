@@ -45,11 +45,8 @@
     $reversedList: ();
     @for $i from length($list) through 1 {
         $item: nth($list, $i);
-        @if type-of($item) == list and $recursive {
-            $reversedList: append($reversedList, reverse($item, $recursive), $sep);
-        } @else {
-            $reversedList: append($reversedList, $item, $sep);
-        }
+        $recursive: $recursive and type-of($item) == list;
+        $reversedList: append($reversedList, if($recursive, reverse($item, $recursive), $item), $sep);
     }
     @return $reversedList;
 }
@@ -62,11 +59,7 @@
         $return: join($return, $sub-list, $sep);
         $max-l: max($max-l, length($sub-list));
     }
-    @if $recursive and $max-l > 1 {
-        @return flatten($return);
-    } @else {
-        @return $return;
-    }
+    @return if($recursive and $max-l > 1, flatten($return), $return);
 }
 
 @function unique($list) {
@@ -87,4 +80,40 @@
     }
     $return: $return + nth($list, length($list));
     @return $return;
+}
+
+@function insert-nth($list, $index, $value) {
+    $result: null;
+
+    @if type-of($index) != number {
+        @warn "$index: #{quote($index)} is not a number for `insert-nth`.";
+    } @else if $index < 1 {
+        @warn "List index 0 must be a non-zero integer for `insert-nth`";
+    } @else if $index > length($list) {
+        @warn "List index is #{$index} but list is only #{length($list)} item long for `insert-nth'.";
+    } @else {
+        $result: ();
+
+        @for $i from 1 through length($list) {
+            @if $i == $index {
+                $result: append($result, $value);
+            }
+
+            $result: append($result, nth($list, $i));
+        }
+    }
+
+    @return $result;
+}
+
+@function depth($list, $starting-depth: 1) {
+    $depth: $starting-depth;
+
+    @each $item in $list {
+        @if type-of($item) == list {
+            $depth: max($depth, depth($item, $starting-depth + 1));
+        }
+    }
+
+    @return $depth;
 }

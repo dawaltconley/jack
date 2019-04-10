@@ -111,16 +111,14 @@ ul.unlist {
  */
 
 h1, h2, h3, h4, h5, h6 {
+    font-family: $header-font-family;
     font-weight: $header-font-weight;
     line-height: 1;
     text-decoration: none;
 }
 
 @for $i from 1 through 6 { // generate header styles
-    $font-size: 1em;
-    @if $i <= length($header-sizes) {
-        $font-size: nth($header-sizes, $i);
-    }
+    $font-size: if($i > length($header-sizes), 1em, nth($header-sizes, $i));
 
     h#{$i} {
         font-size: $font-size;
@@ -142,6 +140,13 @@ a {
     &:hover {
         text-decoration: underline;
     }
+}
+
+button {
+    padding: 0;
+    border: 0;
+    background-color: transparent;
+    color: inherit;
 }
 
 /*
@@ -192,6 +197,6 @@ pre {
  */
 
 svg {
-    @include display(inline); // for ie and others
-    @include display(initial);
+    display: inline; // for ie and others
+    display: initial;
 }
