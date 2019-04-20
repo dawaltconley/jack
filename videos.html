@@ -5,12 +5,12 @@ layout: default
 <div class="content-wrapper padding-l font-0">
   {% for category in site.categories %}
     {% assign category_name = category | first %}
-    <a class="button margin-m-r" href="#{{ category_name | replace: ' ', '-' }}">{{ category_name }}</a>
+    <a class="button margin-m-r" href="#{{ category_name | slugify }}">{{ category_name }}</a>
   {% endfor %}
 
   {% for category in site.categories %}
     {% assign category_name = category | first %}
-    <div id="{{ category_name | replace: ' ', '-' }}" class="inline-columns-3 target target-display">
+    <div id="{{ category_name | slugify }}" class="inline-columns-3 target target-display">
       {% for video in site.categories[category_name] %}
         {% include video.html video=video %}
       {% endfor %}
