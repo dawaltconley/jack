@@ -18,3 +18,7 @@
         white-space: normal;
     }
 }
+
+.inline-columns-3 {
+    @include inline-columns(("laptop", "large"), map-get($spacings, m));
+}
