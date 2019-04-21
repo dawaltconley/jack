@@ -40,7 +40,6 @@ $themes: (
     "red": (
         text-color: white,
         background-color: $brand-color,
-        brand-color: #171717,
     ),
 );
 
@@ -74,6 +73,10 @@ $borders: (
         width: 1px,
         style: solid,
     ),
+    "fat": (
+        width: 3px,
+        style: solid,
+    )
 );
 
 $z-range: -9, 9;
