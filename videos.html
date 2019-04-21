@@ -3,10 +3,12 @@ layout: default
 ---
 
 <div class="content-wrapper padding-l v-rhythm">
-  <header class="border-fat-b font-0">
+  <header class="flex-row flex-justify-center header-height">
     {% for category in site.categories %}
       {% assign category_name = category | first %}
-      <a class="button margin-s-r margin-0-b" href="#{{ category_name | slugify }}">{{ category_name }}</a>
+      <a class="block flex-row flex-align-center full-height padding-ms-h subtle-icon no-wrap hover hover-shade t-default cursor-pointer" href="#{{ category_name | slugify }}">
+        {{ category_name }}
+      </a>
     {% endfor %}
   </header>
 

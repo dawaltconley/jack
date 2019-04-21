@@ -27,7 +27,7 @@
     padding: .5em 1em;
     text-align: center;
     text-shadow: none;
-    border-radius: 7px 7px 0 0;
+    border-radius: 7px;
     transition-duration: map-get($transitions, default);
     transition-property: color, background-color;
 }
