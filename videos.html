@@ -6,7 +6,7 @@ layout: default
   <header class="flex-row flex-justify-center header-height">
     {% for category in site.categories %}
       {% assign category_name = category | first %}
-      <a class="block flex-row flex-align-center full-height padding-ms-h subtle-icon no-wrap hover hover-shade t-default cursor-pointer" href="#{{ category_name | slugify }}">
+      <a class="block flex-row flex-align-center full-height padding-ms-h subtle-icon no-wrap hover hover-brand-color t-default cursor-pointer" href="#{{ category_name | slugify }}">
         {{ category_name }}
       </a>
     {% endfor %}

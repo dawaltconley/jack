@@ -124,9 +124,17 @@
         }
     }
 
-    @include themeify(".subtle-link") {
+    @include themeify(".subtle-link, .hover-brand-color") {
         &, &:hover, &:visited {
             color: $text-color;
+        }
+    }
+
+    @include themeify(".hover-brand-color") {
+        transition-property: color;
+
+        &:hover {
+            color: if($brand-color, $brand-color, $light-text);
         }
     }
 
