@@ -2,21 +2,16 @@
 layout: default
 ---
 
-<div class="screen-height-min flex-row">
-
-  <div class="half-width expand-children">
-    {% capture dancer %}
-      <img class="full-size object-fit-cover" src="{{ site.baseurl }}/assets/gulp-pictures/dancer.png" alt="A shot of a dancer from one of my videos.">
-    {% endcapture %}
-    {% include gulp-picture.liquid img=dancer %}
+<div class="dark no-bg relative screen-size bg-video-wrapper">
+  <iframe class="bg-video abs-center back" src="https://player.vimeo.com/video/254956695?background=1#t=6s"></iframe>
+  <div class="heavy-overlay fill-parent flex-col flex-align-center">
+    {% include header.html %}
+    <h1 class="margin-auto-t">
+      <img class="half-screen-height-max" src="{{ site.logo.full | prepend: site.baseurl }}" alt="Phoenix Post Productions">
+    </h1>
+    <ul class="full-width icon-size shadow flex-row flex-center media-icon-basic media-icon-list">
+      {% include all-media-icons.liquid icon_set=site.data.contact style="simple" list="true" microdata=true %}
+    </ul>
+    <p class="margin-auto-b large-text shadow">{{ site.description }}</p>
   </div>
-
-  <div class="red half-width padding-l flex-col flex-justify-center">
-    <h1>{{ site.title }}</h1>
-    <p class="fw-bold">{{ site.description }}</p>
-
-    {% capture bio %}{% include bio.md %}{% endcapture %}
-    {{ bio | markdownify }}
-  </div>
-
 </div>

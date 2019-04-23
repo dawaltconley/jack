@@ -49,6 +49,11 @@
     @include fixed-ratio(16, 9);
 }
 
+.bg-video-wrapper {
+    @extend .overflow-h;
+    @include bg-video-wrapper(100vw, 100vh, 16/9);
+}
+
 .contains-3d {
     -webkit-perspective: $perspective;
     perspective: $perspective;
