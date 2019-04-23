@@ -8,7 +8,7 @@ baseurl: # for hosting at a subdomain
 url: # full url of main site
 logo:
   header: /assets/logo/logo-simple.png
-  full: /assets/logo/logo-decorative-white.png
+  full: /assets/logo/logo-decorative-black.png
 og_image: # default og image used for entire site; can be overridden if specified in page or collection frontmatter
 google_analytics: # tracking number
 permalink: /:title/ # default permalink structure for pages

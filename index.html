@@ -2,16 +2,25 @@
 layout: default
 ---
 
-<div class="dark no-bg relative screen-size bg-video-wrapper">
-  <iframe class="bg-video abs-center back" src="https://player.vimeo.com/video/254956695?background=1#t=6s"></iframe>
-  <div class="heavy-overlay fill-parent flex-col flex-align-center">
-    {% include header.html %}
-    <h1 class="margin-auto-t">
-      <img class="half-screen-height-max" src="{{ site.logo.full | prepend: site.baseurl }}" alt="Phoenix Post Productions">
-    </h1>
-    <ul class="full-width icon-size shadow flex-row flex-center media-icon-basic media-icon-list">
-      {% include all-media-icons.liquid icon_set=site.data.contact style="simple" list="true" microdata=true %}
-    </ul>
-    <p class="margin-auto-b large-text shadow">{{ site.description }}</p>
+{% include header.html %}
+
+<div class="flex-col flex-center margin-l-v margin-m-h">
+  <h1>
+    <img class="half-screen-height-max" src="{{ site.logo.full | prepend: site.baseurl }}" alt="{{ site.title }}">
+  </h1>
+  <ul class="full-width icon-size flex-row flex-center media-icon-basic media-icon-list">
+    {% include all-media-icons.liquid icon_set=site.data.contact style="simple" list="true" microdata=true %}
+  </ul>
+  <p>{{ site.description }}</p>
+</div>
+
+<div class="dark no-bg relative flex-col flex-center half-screen-height-min bg-video-wrapper">
+  <iframe class="abs-center back no-click" src="https://player.vimeo.com/video/254956695?background=1#t=6s"></iframe>
+  <div class="margin-l-v margin-m-h text-center">
+    <h2 class="x-large-text uppercase shadow">Learn More</h2>
+    <div class="cta-width-max margin-auto-h flex-col flex-fill font-0 h-rhythm-gt-mobile flex-row-gt-mobile">
+      <a class="button subtle-button" href="/videos">View videos</a>
+      <a class="button subtle-button" href="#0">Get a quote</a>
+    </div>
   </div>
 </div>
