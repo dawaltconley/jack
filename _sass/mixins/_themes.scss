@@ -141,7 +141,7 @@
     @include themeify(".hover-brand-color") {
         transition-property: color;
 
-        &:hover {
+        @include hover {
             color: if($brand-color, $brand-color, $light-text);
         }
     }
