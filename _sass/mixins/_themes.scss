@@ -99,6 +99,10 @@
         background-color: $background-color;
     }
 
+    @include themeify(".light-overlay") {
+        background-color: rgba($background-color, 0.25);
+    }
+
     @include themeify(".overlay") {
         background-color: rgba($background-color, 0.5);
     }
