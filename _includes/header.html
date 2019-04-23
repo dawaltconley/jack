@@ -1,10 +1,10 @@
-<header class="dark relative full-width header-height wrapper-padding padding-0-lt-header text-left font-smoothing-normal z-9" data-menu data-fixed-header>
+<header class="light relative full-width header-height wrapper-padding padding-0-lt-header text-left font-smoothing-normal z-9" data-menu data-fixed-header>
 
   <nav id="site-nav" class="flex-row-gt-header full-size target">
     <div class="flex-row full-height wrapper-padding padding-0-gt-header">
       {% unless include.center %}
         <a class="flex-row flex-align-center margin-auto-r full-height padding-xxs-v subtle-icon fill-color-theme-text" href="{{ site.baseurl }}/">
-          {% include acme-logos/logo-8.svg class="full-height" %}
+          <img class="full-height" src="{{ site.logo.header | prepend: site.baseurl }}" alt="Logo">
         </a>
       {% endunless %}
 
@@ -32,7 +32,7 @@
         <div class="relative hover">
         {% endif %}
 
-          <a class="block flex-row-gt-header flex-align-center full-height padding-s-h subtle-icon no-wrap {% unless link.dropdown %} hover {% endunless %} hover-shade hover-shade-dark-lt-header t-short cursor-pointer-gt-header" {% if match %} href="{{ match.url | prepend: site.baseurl }}" {% endif %} data-menu-link>
+          <a class="block flex-row-gt-header flex-align-center full-height padding-s-h subtle-icon no-wrap {% unless link.dropdown %} hover {% endunless %} hover-brand-color hover-shade-dark-lt-header t-short cursor-pointer-gt-header" {% if match %} href="{{ match.url | prepend: site.baseurl }}" {% endif %} data-menu-link>
             {{ link.text }}
           </a>
 
