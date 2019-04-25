@@ -5,7 +5,7 @@ description: >
   Indie films and freelance editing
 keywords: # a YAML list. optional; only used by some older search engines.
 baseurl: # for hosting at a subdomain
-url: # full url of main site
+url: https://phoenixpostproductions.netlify.com # full url of main site
 logo:
   header: /assets/logo/logo-simple.png
   full: /assets/logo/logo-decorative-black.png
