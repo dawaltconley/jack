@@ -214,6 +214,7 @@
 
     @if $brand-color {
         @include themeify(".button.subtle-button") {
+            color: $background-color;
             background-color: $text-color;
             color: $background-color;
             transition-property: color;
