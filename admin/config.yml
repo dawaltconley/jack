@@ -35,9 +35,6 @@ collections:
                     name: date
                     widget: date
                     format: YYYY-MM-DD hh:mm:ss
-                  - label: URL
-                    name: link
-                    widget: string
                   - label: Media
                     name: media
                     widget: select
@@ -45,6 +42,9 @@ collections:
                       - Vimeo
                       - YouTube
                     default: Vimeo
+                  - label: URL
+                    name: link
+                    widget: string
                   - label: Published
                     name: published
                     widget: boolean
