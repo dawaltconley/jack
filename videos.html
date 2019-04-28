@@ -4,18 +4,16 @@ layout: default
 
 <div class="content-wrapper padding-l v-rhythm">
   <header class="flex-row flex-justify-center header-height">
-    {% for category in site.categories %}
-      {% assign category_name = category | first %}
-      <a class="block flex-row flex-align-center full-height padding-ms-h subtle-icon no-wrap hover hover-brand-color t-default cursor-pointer" href="#{{ category_name | slugify }}">
-        {{ category_name }}
+    {% for category in site.data.videos.categories %}
+      <a class="block flex-row flex-align-center full-height padding-ms-h subtle-icon no-wrap hover hover-brand-color t-default cursor-pointer" href="#{{ category.name | slugify }}">
+        {{ category.name }}
       </a>
     {% endfor %}
   </header>
 
-  {% for category in site.categories %}
-    {% assign category_name = category | first %}
-    <div id="{{ category_name | slugify }}" class="inline-columns-3 target target-display">
-      {% for video in site.categories[category_name] %}
+  {% for category in site.data.videos.categories %}
+    <div id="{{ category.name | slugify }}" class="inline-columns-3 target target-display">
+      {% for video in category.videos %}
         {% include video.html video=video %}
       {% endfor %}
     </div>

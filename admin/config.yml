@@ -10,23 +10,41 @@ media_folder: "assets/uploads"
 site_url: {{ site.url }}
 logo_url: {% if site.logo.full %}{{ site.logo.full }}{% endif %}
 collections:
-  - label: Posts
-    label_singular: Post
-    name: posts
-    folder: _posts
-    extension: md
-    create: true
-    slug: {% raw %}"{{ title }}"{% endraw %}
-    preview_page: {% raw %}"{{ slug }}"{% endraw %}
-    description: >
-      The basic type of content.
-    fields:
-      - label: Title
-        name: title
-        widget: string
-        default: New Post
-        hint: Full title, used at the top of the page.
-      - label: Body
-        name: body
-        widget: markdown
-        default: New day, new post!
+  - label: Videos
+    name: videos
+    files:
+      - label: Videos Page
+        name: videos-page
+        file: _data/videos.yml
+        fields:
+          - label: Categories
+            name: categories
+            widget: list
+            fields:
+              - label: Name
+                name: name
+                widget: string
+              - label: Videos
+                name: videos
+                widget: list
+                fields:
+                  - label: Title
+                    name: title
+                    widget: string
+                  - label: Date
+                    name: date
+                    widget: date
+                    format: YYYY-MM-DD hh:mm:ss
+                  - label: URL
+                    name: link
+                    widget: string
+                  - label: Media
+                    name: media
+                    widget: select
+                    options:
+                      - Vimeo
+                      - YouTube
+                    default: Vimeo
+                  - label: Published
+                    name: published
+                    widget: boolean

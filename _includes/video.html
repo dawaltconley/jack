@@ -2,9 +2,9 @@
 {% assign link = include.video.link %}
 {% assign type = include.video.media %}
 {% case type %}
-{% when 'youtube' %}
+{% when 'YouTube' %}
   {% assign link = link | replace: '/watch?v=', '/embed/' %}
-{% when 'vimeo' %}
+{% when 'Vimeo' %}
   {% assign link = link | remove: 'https://vimeo.com/' | prepend: 'https://player.vimeo.com/video/' | append: '?title=0&byline=0&portrait=0' %}
 {% endcase %}
 

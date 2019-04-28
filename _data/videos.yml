@@ -1,0 +1,20 @@
+categories:
+  - name: Coppertone
+    videos:
+      - title: Coppertone Tennis
+        date: '2017-07-24 23:31 -0400'
+        link: 'https://vimeo.com/214580061'
+        media: Vimeo
+        published: true
+      - title: Coppertone Pool
+        date: '2017-08-03 17:09 -0400'
+        link: 'https://vimeo.com/214580255'
+        media: Vimeo
+        published: true
+  - name: Short Films
+    videos:
+      - title: HECK
+        date: '2017-08-03 23:45 -0400'
+        link: 'https://vimeo.com/218367060'
+        media: Vimeo
+        published: true
