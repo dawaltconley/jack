@@ -1,15 +1,13 @@
 // Basic Variables
 
 $base-font-family:      "Montserrat", sans-serif;
-$base-font-size:        1.25rem;
 $base-font-weight:      300;
 $base-line-height:      1.5;
 $base-line-length:      36em;
-$base-icon-size:        1.5rem;
 
-$header-sizes:          2em, 1.2em, 1.1em;
-$header-font-family:    null;
-$header-font-weight:    900;
+$heading-sizes:          2em, 1.2em, 1.1em;
+$heading-font-family:    null;
+$heading-font-weight:    900;
 
 $text-shadow:           1px 1px 4px rgba(0, 0, 0, 0.2);
 $full-shadow:           0 0 0.24em black;
@@ -48,6 +46,14 @@ $themes: (
 );
 
 $theme-depth: 1; // controls the depth (in a series nested themes) at which an element still inherits the styles of its immediate ancestor theme. stylesheets get much larger and more complex as this number increases, so it should be set as low as possible.
+
+$font-sizes: (
+    "base": 1.25rem,
+    "icon": 1.5rem,
+    "l":    2em,
+);
+
+$base-font-size: map-get($font-sizes, base);
 
 $sizes: (
     "full":             100%,

@@ -221,6 +221,27 @@
     var onScrollUp = onScroll.bind(null, "up");
     var onScrollDown = onScroll.bind(null, "down");
 
+    function onScrollEnd(callback) {
+        var buffer = arguments.length > 1 && arguments[1] != undefined ? arguments[1] : 100;
+        var scroller = arguments.length > 2 && arguments[2] != undefined ? arguments[2] : win;
+        var removeListener = scroller.removeEventListener.bind(scroller, "scroll", scrolling, passive);
+        var doneScrolling;
+
+        function scrolling() {
+            window.clearTimeout(doneScrolling);
+            doneScrolling = window.setTimeout(function () {
+                removeListener();
+                callback();
+            }, buffer);
+        };
+
+        scroller.addEventListener("scroll", scrolling, passive);
+        return function () {
+            removeListener();
+            window.clearTimeout(doneScrolling);
+        };
+    };
+
     function updateObj(obj, newObj) {
         for (var key in newObj) {
             obj[key] = newObj[key];
@@ -360,7 +381,11 @@
         this.pos = page.scrollTop;
         this.refPos = pagePos(header);
 
-        this.resize();
+        this.scrollListener = this.scroll.bind(this);
+        this.slideUp = this.slide.bind(this, "up");
+        this.slideDown = this.slide.bind(this, "down");
+
+        this.matchRef();
         updateObj(this.element.style, { position: "fixed", top: -this.height.toString() + "px", zIndex: "999", display: "none" });
         updateDescendentIds(e, "-fixed");
         document.body.insertBefore(this.element, document.body.firstChild);
@@ -382,22 +407,23 @@
         var pos = page.scrollTop;
         var scrollDiff = pos - f.pos;
         window.clearTimeout(f.doneScrolling);
-        if ((e.style.display != "none" && pos > f.refPos.top) || (e.style.display == "none" && pos > f.refPos.bottom)) {
+        f.doneScrolling = window.setTimeout(function () {
+            f.interruptSlide = false;
+        }, 50);
+        if (e.style.display != "none" && pos > f.refPos.top || e.style.display == "none" && pos > f.refPos.bottom) {
             e.style.display = "";
             f.hideHeaderRef();
-            f.interruptSlideDown = true;
+            f.interruptSlide = true;
             var top = parseInt(e.style.top);
-            if ((scrollDiff < 0 && top < 0) || (scrollDiff > 0 && top > -f.height)){
+            if (scrollDiff < 0 && top < 0 || scrollDiff > 0 && top > -f.height) {
                 top = Math.min(Math.max(top - scrollDiff, -f.height), 0);
                 e.style.top = top.toString() + "px";
-                f.setShadow();
+                f.setShadow(top + f.height);
                 f.doneScrolling = window.setTimeout(function () {
-                    f.interruptSlideDown = false;
-                    requestAnimationFrame(f.slideDown.bind(f))
+                    requestAnimationFrame(f.slideDown.bind(f));
                 }, 500);
             }
         } else if (e.style.display != "none") {
-            e.style.display = "none";
             f.showHeaderRef();
             updateObj(e.style, { display: "none", top: -f.height.toString() + "px" });
             f.setShadow();
@@ -405,33 +431,49 @@
         f.pos = pos;
     }
 
-    FixedHeader.prototype.resize = function () {
-        window.clearTimeout(this.doneResizing);
+    FixedHeader.prototype.disableScroll = function () {
         win.removeEventListener("scroll", this.scrollListener, passive);
-        this.doneResizing = window.setTimeout(win.addEventListener.bind(win, "scroll", this.scrollListener, passive), 100);
+    };
+
+    FixedHeader.prototype.enableScroll = function () {
+        this.pos = page.scrollTop;
+        win.addEventListener("scroll", this.scrollListener, passive);
+    };
+
+    FixedHeader.prototype.matchRef = function () {
         this.refPos = pagePos(this.headerRef);
         this.height = this.headerRef.clientHeight;
         updateObj(this.element.style, { width: this.headerRef.clientWidth.toString() + "px", height: this.height.toString() + "px" });
     }
 
-    FixedHeader.prototype.slideDown = function () {
-        if (this.interruptSlideDown) { return null; }
+    FixedHeader.prototype.resize = function () {
+        this.disableScroll();
+        this.matchRef();
+        window.clearTimeout(this.doneResizing);
+        this.doneResizing = window.setTimeout(this.enableScroll(), 100);
+    };
+
+    FixedHeader.prototype.slide = function (direction) {
+        var callback = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : function () {};
         var t = parseInt(this.element.style.top);
-        if (t < 0) {
-            var dist = Math.max(-t/5, 1);
-            this.element.style.top = (t + dist).toString() + "px";
-            requestAnimationFrame(this.slideDown.bind(this));
+        var b = t + this.height;
+        if (this.interruptSlide) { return null; } // run callback?
+        if (direction === "down" && t < 0 || direction === "up" && b > 0) {
+            var dist = direction === "down" ? Math.min(t/5, -1) : Math.max(b/5, 1);
+            this.element.style.top = (t - dist).toString() + "px";
+            window.clearTimeout(callback);
+            requestAnimationFrame(this.slide.bind(this, direction, callback));
         }
-        this.setShadow();
-    }
+        this.setShadow(b);
+        window.setTimeout(callback, 50);
+    };
 
     FixedHeader.prototype.setShadow = function () {
-        var b = Math.max(this.element.getBoundingClientRect().bottom, 0);
+        var b = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : parseInt(this.element.style.top) + this.height;
         this.element.style.boxShadow = "0 " + (b/32).toString() + "px " + (b/16).toString() + "px 0 rgba(0, 0, 0, 0.2)";
     }
 
     FixedHeader.prototype.addListeners = function () {
-        this.scrollListener = this.scroll.bind(this);
         win.addEventListener("scroll", this.scrollListener, passive);
         window.addEventListener("resize", this.resize.bind(this), passive);
     }
@@ -523,110 +565,6 @@
             }
         }
     }
-
-/*
- * Background Image Testing
- */
-
-    var bgTestingObjects = toArray(document.querySelectorAll("[data-background-images]"));
-    for (var i = 0; i < bgTestingObjects.length; i++) {
-        bgTestingObjects[i] = new BgSelect(bgTestingObjects[i]);
-    }
-
-    function BgSelect(element) {
-        var menuContainer = element;
-        var computedStyle = window.getComputedStyle(element);
-        var position = computedStyle.getPropertyValue("position");
-        var initialImage = {"name": "initial"};
-
-        if (element.tagName == "IMG") { // use element.src?
-            initialImage.path = element.src;
-            initialImage.size = computedStyle.getPropertyValue("object-fit") == "contain" ? "contain" : "cover";
-            initialImage.position = computedStyle.getPropertyValue("object-position");
-
-            var divImg = document.createElement("div");
-            divImg.setAttribute("data-background-images", element.getAttribute("data-background-images"));
-            divImg.classList = element.classList;
-            divImg.classList.add("bg-img");
-            updateObj(divImg.style, { backgroundImage: "url('" + initialImage.path + "')", backgroundSize: initialImage.size, backgroundPosition: initialImage.position });
-            menuContainer = divImg;
-
-            function replaceImgWithDiv(img, replacement) {
-                updateObj(replacement.style, { width: img.width + "px", height: img.height + "px" });
-                img.parentNode.replaceChild(replacement, img);
-            }
-
-            if (element.complete) {
-                replaceImgWithDiv(element, divImg);
-            } else {
-                element.onload = replaceImgWithDiv.bind(null, element, divImg);
-            }
-
-            element = divImg;
-        } else {
-            initialImage.path = computedStyle.getPropertyValue("background-image").replace(/.*\s?url\([\'\"]?/, '').replace(/[\'\"]?\).*/, '');
-            initialImage.size = computedStyle.getPropertyValue("background-size");
-            initialImage.position = computedStyle.getPropertyValue("background-position");
-        }
-
-        if (position == "static" ) {
-            element.style.position = "relative";
-        } else if (position == "absolute") {
-            menuContainer = element.parentElement;
-        }
-
-        this.element = element;
-        this.controls = document.createElement("div");
-        updateObj(this.controls.style, { position: "absolute", bottom: "0", left: "0", zIndex: "999" });
-        this.menu = document.createElement("select");
-        this.slider = document.createElement("input");
-        this.slider.type = "range";
-        this.slider.value = "50";
-
-        this.images = JSON.parse(element.getAttribute("data-background-images"));
-        this.images.unshift(initialImage);
-
-        for (var i=0; i < this.images.length; i++) {
-            var image = this.images[i];
-            var imageName = image["name"] ? image["name"] : "image " + i;
-            var opt = document.createElement("option");
-            opt.textContent = imageName;
-            this.menu.appendChild(opt);
-        }
-
-        this.controls.appendChild(this.menu);
-        this.controls.appendChild(this.slider);
-        menuContainer.appendChild(this.controls);
-    }
-
-    BgSelect.prototype.setBg = function (trigger) {
-        var image = this.images[this.menu.selectedIndex];
-        var imagePath = image["path"] ? image["path"] : image;
-        if (trigger == "menu" && image["slider"]) { this.slider.value = image["slider"]; }
-        var lightness = ((Number(this.slider.value) - 50) / 50).toString();
-
-        if (lightness >= 0) {
-            this.element.style.backgroundImage = "linear-gradient(rgba(255, 255, 255, " + lightness + "), rgba(255, 255, 255, " + lightness + ")), url('" + imagePath + "')";
-            console.log("image: %s\nlightness: %s\nslider: %s", imagePath, lightness, Number(this.slider.value));
-        } else {
-            var darkness = Math.abs(lightness);
-            this.element.style.backgroundImage = "linear-gradient(rgba(0, 0, 0, " + darkness + "), rgba(0, 0, 0, " + darkness + ")), url('" + imagePath + "')";
-            console.log("image: %s\ndarkness: %s\nslider: %s", imagePath, darkness, Number(this.slider.value));
-        }
-
-        image["size"] ? this.element.style.backgroundSize = image["size"] : this.element.style.backgroundSize = null;
-        image["position"] ? this.element.style.backgroundPosition = image["position"] : this.element.style.backgroundPosition = null;
-    }
-
-    bgTestingObjects.forEach(function (obj) {
-        obj.element.removeAttribute("data-background-images");
-        obj.menu.onchange = obj.setBg.bind(obj, "menu");
-        obj.slider.onchange = obj.setBg.bind(obj);
-        obj.slider.ondblclick = function () {
-            obj.slider.value = 50;
-            obj.setBg();
-        }
-    });
 
 /*
  * Animations

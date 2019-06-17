@@ -18,8 +18,8 @@
 }
 
 @mixin accessibility($name, $background-color, $text-color, $brand-color: null, $accessibility: "AA") {
-    $aa: to-upper-case(inspect($accessibility)) == inspect("AA");
-    $aaa: to-uppder-case(inspect($accessibility)) == inspect("AAA");
+    $aa: to-upper-case($accessibility) == "AA";
+    $aaa: to-upper-case($accessibility) == "AAA";
 
     $ct-tx-bg: ch-color-contrast($background-color, $text-color);
 
@@ -131,8 +131,8 @@
         @include themeify("a") {
             color: $brand-color;
 
-            &:hover { color: darken($brand-color, $ld-br-tx * 45%); }
-            &:visited { color: lighten($brand-color, $ld-br-bg * 35%); }
+            &:visited { color: lighten($brand-color, if($light-theme, $ld-br-bg, $ld-br-tx) * 35%); }
+            &:hover { color: darken($brand-color, if($light-theme, $ld-br-tx, $ld-br-bg) * 45%); }
         }
     }
 
@@ -232,6 +232,20 @@
                     color: $text-color;
                 }
             }
+        }
+    }
+
+    // Decoration
+
+    @include themeify(".fade-bottom") {
+        @extend .relative;
+
+        &::after {
+            content: "";
+            position: absolute;
+            left: 0; right: 0; bottom: 0;
+            height: map-get($spacings, l);
+            background: linear-gradient(to bottom, transparent, $background-color 80%);
         }
     }
 
